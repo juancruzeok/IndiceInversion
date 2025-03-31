@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>#IndiceFondo – Inversión Posible</title>
+    <style>
+        body { font-family: sans-serif; background: #f1f8e9; padding: 20px; margin: 0; }
+        .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { text-align: center; color: #2e7d32; }
+        label { font-weight: bold; display: block; margin-top: 15px; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; }
+        .section { margin-top: 30px; background: #e8f5e9; padding: 15px; border-left: 5px solid #43a047; border-radius: 6px; }
+        ul { padding-left: 20px; }
+        li { margin: 5px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>#IndiceFondo</h1>
+    <p style="text-align:center;">Descubrí cuánto valen tus ingresos hoy.</p>
+
+    <label for="moneda">Elegí la moneda:</label>
+    <select id="moneda">
+        <option value="USD">Dólares</option>
+        <option value="ARS">Pesos</option>
+    </select>
+
+    <label for="monto">Ingresá el monto:</label>
+    <input type="number" id="monto" value="100" min="1">
+
+    <label for="fecha">Elegí una fecha:</label>
+    <input type="date" id="fecha" min="2023-12-10" max="2025-03-31" value="2025-03-31">
+
+    <div class="section">
+        <h2>Productos sociales</h2>
+        <label for="categoria_social">Filtrar por categoría:</label>
+        <select id="categoria_social" onchange="calcular()">
+            <option value="todos">Todos</option>
+            <option value="alimentacion">Alimentación</option>
+            <option value="educacion">Educación</option>
+            <option value="transporte">Transporte</option>
+            <option value="salud">Salud</option>
+        </select>
+        <ul id="lista_social"></ul>
+    </div>
+
+    <div class="section">
+        <h2>Obras públicas</h2>
+        <label for="categoria_obra">Filtrar por categoría:</label>
+        <select id="categoria_obra" onchange="calcular()">
+            <option value="todas">Todas</option>
+            <option value="educacion">Educación</option>
+            <option value="salud">Salud</option>
+            <option value="vivienda">Vivienda</option>
+            <option value="seguridad">Seguridad</option>
+            <option value="infraestructura">Infraestructura</option>
+        </select>
+        <ul id="lista_obras"></ul>
+    </div>
+</div>
+
+<script>
+const tipoCambio = { "2023": 800, "2024": 950, "2025": 1300 };
+
+
+const sociales = {
+    "2023": {
+        "Aceite (900ml)": { precio: 900, categoria: "alimentacion" },
+        "Arroz (1kg)": { precio: 1200, categoria: "alimentacion" },
+        "Azúcar (1kg)": { precio: 1000, categoria: "alimentacion" },
+        "Fideos (500g)": { precio: 700, categoria: "alimentacion" },
+        "Pan (1kg)": { precio: 750, categoria: "alimentacion" },
+        "Leche (1L)": { precio: 700, categoria: "alimentacion" },
+        "Carne picada (1kg)": { precio: 8000, categoria: "alimentacion" },
+        "Manteca (200g)": { precio: 700, categoria: "alimentacion" },
+        "Queso rallado (150g)": { precio: 1600, categoria: "alimentacion" },
+        "Yerba (1kg)": { precio: 1300, categoria: "alimentacion" },
+        "Jabón de tocador": { precio: 500, categoria: "higiene" },
+        "Shampoo": { precio: 900, categoria: "higiene" },
+        "Papel higiénico (4 rollos)": { precio: 1100, categoria: "higiene" }
+    },
+    "2024": {
+        "Aceite (900ml)": { precio: 1100, categoria: "alimentacion" },
+        "Arroz (1kg)": { precio: 1500, categoria: "alimentacion" },
+        "Azúcar (1kg)": { precio: 1300, categoria: "alimentacion" },
+        "Fideos (500g)": { precio: 900, categoria: "alimentacion" },
+        "Pan (1kg)": { precio: 1000, categoria: "alimentacion" },
+        "Leche (1L)": { precio: 900, categoria: "alimentacion" },
+        "Carne picada (1kg)": { precio: 10000, categoria: "alimentacion" },
+        "Manteca (200g)": { precio: 850, categoria: "alimentacion" },
+        "Queso rallado (150g)": { precio: 2000, categoria: "alimentacion" },
+        "Yerba (1kg)": { precio: 1500, categoria: "alimentacion" },
+        "Jabón de tocador": { precio: 600, categoria: "higiene" },
+        "Shampoo": { precio: 1100, categoria: "higiene" },
+        "Papel higiénico (4 rollos)": { precio: 1300, categoria: "higiene" }
+    },
+    "2025": {
+        "Aceite (900ml)": { precio: 1400, categoria: "alimentacion" },
+        "Arroz (1kg)": { precio: 1800, categoria: "alimentacion" },
+        "Azúcar (1kg)": { precio: 1600, categoria: "alimentacion" },
+        "Fideos (500g)": { precio: 1000, categoria: "alimentacion" },
+        "Pan (1kg)": { precio: 1300, categoria: "alimentacion" },
+        "Leche (1L)": { precio: 1200, categoria: "alimentacion" },
+        "Carne picada (1kg)": { precio: 13000, categoria: "alimentacion" },
+        "Manteca (200g)": { precio: 1000, categoria: "alimentacion" },
+        "Queso rallado (150g)": { precio: 2400, categoria: "alimentacion" },
+        "Yerba (1kg)": { precio: 2000, categoria: "alimentacion" },
+        "Jabón de tocador": { precio: 800, categoria: "higiene" },
+        "Shampoo": { precio: 1300, categoria: "higiene" },
+        "Papel higiénico (4 rollos)": { precio: 1500, categoria: "higiene" }
+    }
+};
+
+    "2025": {
+        "Escuelas públicas": { valor: 2500000, categoria: "educacion" },
+        "Hospitales": { valor: 15000000, categoria: "salud" },
+        "Viviendas sociales": { valor: 90000, categoria: "vivienda" },
+        "Universidades": { valor: 30000000, categoria: "educacion" },
+        "Patrulleros": { valor: 30000, categoria: "seguridad" },
+        "Cámaras de seguridad": { valor: 5000, categoria: "seguridad" },
+        "Chalecos antibala": { valor: 600, categoria: "seguridad" },
+        "Km Ruta": { valor: 2300000, categoria: "infraestructura" },
+        "Dosis de vacunas esenciales": { valor: 10, categoria: "salud" },
+        "Coche de tren": { valor: 2000000, categoria: "infraestructura" }
+        
+        "Aceite (900ml)": { precio: 1400, categoria: "alimentacion" },
+        "Arroz (1kg)": { precio: 1800, categoria: "alimentacion" },
+        "Azúcar (1kg)": { precio: 1600, categoria: "alimentacion" },
+        "Fideos (500g)": { precio: 1000, categoria: "alimentacion" },
+        "Pan (1kg)": { precio: 1300, categoria: "alimentacion" },
+        "Leche (1L)": { precio: 1200, categoria: "alimentacion" },
+        "Carne picada (1kg)": { precio: 13000, categoria: "alimentacion" },
+        "Manteca (200g)": { precio: 1000, categoria: "alimentacion" },
+        "Queso rallado (150g)": { precio: 2400, categoria: "alimentacion" },
+        "Yerba (1kg)": { precio: 2000, categoria: "alimentacion" },
+        "Jabón de tocador": { precio: 800, categoria: "higiene" },
+        "Shampoo": { precio: 1300, categoria: "higiene" },
+        "Papel higiénico (4 rollos)": { precio: 1500, categoria: "higiene" },
+        
+        "Garrafa de gas (10kg)": { precio: 7500, categoria: "transporte" },
+        "Botella de agua (1,5L)": { precio: 900, categoria: "alimentacion" },
+        "Recarga SUBE mínima": { precio: 1500, categoria: "transporte" },
+        "Cuaderno escolar": { precio: 2000, categoria: "educacion" },
+        "Caja de té (25)": { precio: 1600, categoria: "alimentacion" },
+        "Cepillo de dientes": { precio: 1000, categoria: "educacion" },
+        "Toallitas femeninas": { precio: 1400, categoria: "educacion" },
+        "Luz + gas (día)": { precio: 1200, categoria: "transporte" },
+        "Internet prepago (día)": { precio: 800, categoria: "educacion" },
+        "Ibuprofeno (400mg)": { precio: 2200, categoria: "salud" }
+    }
+};
+
+
+const obras = {
+    "2023": {
+        "Escuelas públicas": { valor: 1500000, categoria: "educacion" },
+        "Hospitales": { valor: 10000000, categoria: "salud" },
+        "Viviendas sociales": { valor: 60000, categoria: "vivienda" },
+        "Universidades": { valor: 20000000, categoria: "educacion" },
+        "Patrulleros": { valor: 30000, categoria: "seguridad" },
+        "Cámaras de seguridad": { valor: 3000, categoria: "seguridad" },
+        "Chalecos antibala": { valor: 400, categoria: "seguridad" },
+        "Km Ruta": { valor: 1500000, categoria: "infraestructura" },
+        "Dosis de vacunas esenciales": { valor: 5, categoria: "salud" },
+        "Coche de tren": { valor: 1500000, categoria: "infraestructura" }
+    },
+    "2024": {
+        "Escuelas públicas": { valor: 2000000, categoria: "educacion" },
+        "Hospitales": { valor: 12000000, categoria: "salud" },
+        "Viviendas sociales": { valor: 75000, categoria: "vivienda" },
+        "Universidades": { valor: 25000000, categoria: "educacion" },
+        "Patrulleros": { valor: 30000, categoria: "seguridad" },
+        "Cámaras de seguridad": { valor: 4000, categoria: "seguridad" },
+        "Chalecos antibala": { valor: 500, categoria: "seguridad" },
+        "Km Ruta": { valor: 1900000, categoria: "infraestructura" },
+        "Dosis de vacunas esenciales": { valor: 8, categoria: "salud" },
+        "Coche de tren": { valor: 1800000, categoria: "infraestructura" }
+    },
+    "2025": {
+        "Escuelas públicas": { valor: 2500000, categoria: "educacion" },
+        "Hospitales": { valor: 15000000, categoria: "salud" },
+        "Viviendas sociales": { valor: 90000, categoria: "vivienda" },
+        "Universidades": { valor: 30000000, categoria: "educacion" },
+        "Patrulleros": { valor: 30000, categoria: "seguridad" },
+        "Cámaras de seguridad": { valor: 5000, categoria: "seguridad" },
+        "Chalecos antibala": { valor: 600, categoria: "seguridad" },
+        "Km Ruta": { valor: 2300000, categoria: "infraestructura" },
+        "Dosis de vacunas esenciales": { valor: 10, categoria: "salud" },
+        "Coche de tren": { valor: 2000000, categoria: "infraestructura" }
+    }
+};
+
+    "2025": {
+        "Escuelas públicas": { valor: 2500000, categoria: "educacion" },
+        "Hospitales": { valor: 15000000, categoria: "salud" },
+        "Viviendas sociales": { valor: 90000, categoria: "vivienda" },
+        "Universidades": { valor: 30000000, categoria: "educacion" },
+        "Patrulleros": { valor: 30000, categoria: "seguridad" },
+        "Cámaras de seguridad": { valor: 5000, categoria: "seguridad" },
+        "Chalecos antibala": { valor: 600, categoria: "seguridad" },
+        "Km Ruta": { valor: 2300000, categoria: "infraestructura" },
+        "Dosis de vacunas esenciales": { valor: 10, categoria: "salud" },
+        "Coche de tren": { valor: 2000000, categoria: "infraestructura" }
+        
+        "Aceite (900ml)": { precio: 1400, categoria: "alimentacion" },
+        "Arroz (1kg)": { precio: 1800, categoria: "alimentacion" },
+        "Azúcar (1kg)": { precio: 1600, categoria: "alimentacion" },
+        "Fideos (500g)": { precio: 1000, categoria: "alimentacion" },
+        "Pan (1kg)": { precio: 1300, categoria: "alimentacion" },
+        "Leche (1L)": { precio: 1200, categoria: "alimentacion" },
+        "Carne picada (1kg)": { precio: 13000, categoria: "alimentacion" },
+        "Manteca (200g)": { precio: 1000, categoria: "alimentacion" },
+        "Queso rallado (150g)": { precio: 2400, categoria: "alimentacion" },
+        "Yerba (1kg)": { precio: 2000, categoria: "alimentacion" },
+        "Jabón de tocador": { precio: 800, categoria: "higiene" },
+        "Shampoo": { precio: 1300, categoria: "higiene" },
+        "Papel higiénico (4 rollos)": { precio: 1500, categoria: "higiene" },
+        
+        "Escuelas públicas": { valor: 2500000, categoria: "educacion" },
+        "Hospitales": { valor: 15000000, categoria: "salud" },
+        "Viviendas sociales": { valor: 90000, categoria: "vivienda" },
+        "Universidades": { valor: 30000000, categoria: "educacion" },
+        "Patrulleros": { valor: 30000, categoria: "seguridad" },
+        "Km Ruta": { valor: 2300000, categoria: "infraestructura" }
+    }
+};
+
+function calcular() {
+    const monto = parseFloat(document.getElementById("monto").value);
+    const moneda = document.getElementById("moneda").value;
+    const fecha = document.getElementById("fecha").value;
+    const anio = fecha.split("-")[0];
+    const usd = moneda === "USD" ? monto : monto / tipoCambio[anio];
+    const pesos = usd * tipoCambio[anio];
+
+    const catSocial = document.getElementById("categoria_social").value;
+    const listaSocial = document.getElementById("lista_social");
+    listaSocial.innerHTML = "";
+    for (let item in sociales[anio]) {
+        if (catSocial === "todos" || sociales[anio][item].categoria === catSocial) {
+            const cant = Math.floor(pesos / sociales[anio][item].precio);
+            const li = document.createElement("li");
+            li.textContent = `${cant} × ${item}`;
+            listaSocial.appendChild(li);
+        }
+    }
+
+    const catObra = document.getElementById("categoria_obra").value;
+    const listaObras = document.getElementById("lista_obras");
+    listaObras.innerHTML = "";
+    for (let item in obras[anio]) {
+        if (catObra === "todas" || obras[anio][item].categoria === catObra) {
+            const cant = Math.floor(usd / obras[anio][item].valor);
+            const li = document.createElement("li");
+            li.textContent = `${cant} × ${item}`;
+            listaObras.appendChild(li);
+        }
+    }
+}
+
+document.getElementById("moneda").addEventListener("change", calcular);
+document.getElementById("monto").addEventListener("input", calcular);
+document.getElementById("fecha").addEventListener("change", calcular);
+window.onload = calcular;
+</script>
+</body>
+</html>
